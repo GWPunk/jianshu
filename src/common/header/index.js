@@ -9,6 +9,11 @@ import {
   NavItem,
   SearchWrapper,
   NavSearch,
+  SearchInfo,
+  SearchInfoTitle,
+  SearchInfoSwitch,
+  SearchInfoList,
+  SearchInfoItem,
   Addition,
   Button,
 } from "./style";
@@ -38,12 +43,12 @@ class Header extends Component {
                   onBlur={this.props.handleSearchBlur}
                 />
               </CSSTransition>
-
               <i
                 className={this.props.focused ? "focused iconfont" : "iconfont"}
               >
                 &#xe614;
               </i>
+              {this.getHotSearch(this.props.focused)}
             </SearchWrapper>
           </Nav>
           <Addition>
@@ -56,6 +61,28 @@ class Header extends Component {
         </HeaderWrapper>
       </div>
     );
+  }
+  getHotSearch(show) {
+    if (show) {
+      return (
+        <SearchInfo>
+          <SearchInfoTitle>
+            热门搜索
+            <SearchInfoSwitch>换一批</SearchInfoSwitch>
+          </SearchInfoTitle>
+          <SearchInfoList>
+            <SearchInfoItem>教育</SearchInfoItem>
+            <SearchInfoItem>教育</SearchInfoItem>
+            <SearchInfoItem>教育</SearchInfoItem>
+            <SearchInfoItem>教育</SearchInfoItem>
+            <SearchInfoItem>教育</SearchInfoItem>
+            <SearchInfoItem>教育</SearchInfoItem>
+          </SearchInfoList>
+        </SearchInfo>
+      );
+    } else {
+      return null;
+    }
   }
 }
 const mapStateToProps = (state) => {
