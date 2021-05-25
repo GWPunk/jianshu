@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { CSSTransition } from "react-transition-group";
+import { connect } from "react-redux";
+import * as actionCreator from "./store/actionCreator";
 import {
   HeaderWrapper,
   Logo,
@@ -12,14 +14,6 @@ import {
 } from "./style";
 
 class Header extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      focused: false,
-    };
-    this.handleSearchFocus = this.handleSearchFocus.bind(this);
-    this.handleSearchBlur = this.handleSearchBlur.bind(this);
-  }
   render() {
     return (
       <div>
@@ -34,19 +28,19 @@ class Header extends Component {
             </NavItem>
             <SearchWrapper>
               <CSSTransition
-                in={this.state.focused}
+                in={this.props.focused}
                 timeout={200}
                 classNames="slide"
               >
                 <NavSearch
-                  className={this.state.focused ? "focused" : ""}
-                  onFocus={this.handleSearchFocus}
-                  onBlur={this.handleSearchBlur}
+                  className={this.props.focused ? "focused" : ""}
+                  onFocus={this.props.handleSearchFocus}
+                  onBlur={this.props.handleSearchBlur}
                 />
               </CSSTransition>
 
               <i
-                className={this.state.focused ? "focused iconfont" : "iconfont"}
+                className={this.props.focused ? "focused iconfont" : "iconfont"}
               >
                 &#xe614;
               </i>
@@ -63,15 +57,22 @@ class Header extends Component {
       </div>
     );
   }
-  handleSearchFocus() {
-    this.setState({
-      focused: true,
-    });
-  }
-  handleSearchBlur() {
-    this.setState({
-      focused: false,
-    });
-  }
 }
-export default Header;
+const mapStateToProps = (state) => {
+  return {
+    focused: state.getIn(["header", "focused"]),
+  };
+};
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    handleSearchFocus() {
+      const active = actionCreator.getSeachFocus();
+      dispatch(active);
+    },
+    handleSearchBlur() {
+      const active = actionCreator.getSeachBlur();
+      dispatch(active);
+    },
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
