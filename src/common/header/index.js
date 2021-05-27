@@ -20,6 +20,7 @@ import {
 
 class Header extends Component {
   render() {
+    const { focused, handleSearchFocus, handleSearchBlur, list } = this.props;
     return (
       <div>
         <HeaderWrapper>
@@ -32,23 +33,19 @@ class Header extends Component {
               <i className="iconfont">&#xe636;</i>
             </NavItem>
             <SearchWrapper>
-              <CSSTransition
-                in={this.props.focused}
-                timeout={200}
-                classNames="slide"
-              >
+              <CSSTransition in={focused} timeout={200} classNames="slide">
                 <NavSearch
-                  className={this.props.focused ? "focused" : ""}
-                  onFocus={this.props.handleSearchFocus}
-                  onBlur={this.props.handleSearchBlur}
+                  className={focused ? "focused" : ""}
+                  onFocus={() => handleSearchFocus(list)}
+                  onBlur={handleSearchBlur}
                 />
               </CSSTransition>
               <i
-                className={this.props.focused ? "focused iconfont" : "iconfont"}
+                className={focused ? "focused iconfont zoom" : "iconfont zoom"}
               >
                 &#xe614;
               </i>
-              {this.getHotSearch(this.props.focused)}
+              {this.getHotSearch(focused)}
             </SearchWrapper>
           </Nav>
           <Addition>
@@ -63,21 +60,52 @@ class Header extends Component {
     );
   }
   getHotSearch(show) {
-    if (show) {
+    const {
+      list,
+      mouseIn,
+      page,
+      totalPage,
+      handChangeClick,
+      handleMouseEnter,
+      handleMouseLeave,
+    } = this.props;
+    const newList = list.toJS();
+    let temp = [];
+
+    //一开始渲染时list为空，此时key值全是undefined会报错警告
+    if (newList.length) {
+      for (let i = (page - 1) * 10; i < page * 10; i++) {
+        temp.push(
+          <SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>
+        );
+      }
+    }
+
+    if (show || mouseIn) {
       return (
-        <SearchInfo>
+        <SearchInfo
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <SearchInfoTitle>
             热门搜索
-            <SearchInfoSwitch>换一批</SearchInfoSwitch>
+            <SearchInfoSwitch
+              onClick={() => {
+                handChangeClick(page, totalPage, this.spinIcon);
+              }}
+            >
+              <i
+                ref={(icon) => {
+                  this.spinIcon = icon;
+                }}
+                className="iconfont spin"
+              >
+                &#xe851;
+              </i>
+              换一批
+            </SearchInfoSwitch>
           </SearchInfoTitle>
-          <SearchInfoList>
-            <SearchInfoItem>教育</SearchInfoItem>
-            <SearchInfoItem>教育</SearchInfoItem>
-            <SearchInfoItem>教育</SearchInfoItem>
-            <SearchInfoItem>教育</SearchInfoItem>
-            <SearchInfoItem>教育</SearchInfoItem>
-            <SearchInfoItem>教育</SearchInfoItem>
-          </SearchInfoList>
+          <SearchInfoList>{temp}</SearchInfoList>
         </SearchInfo>
       );
     } else {
@@ -85,20 +113,41 @@ class Header extends Component {
     }
   }
 }
+
 const mapStateToProps = (state) => {
   return {
     focused: state.getIn(["header", "focused"]),
+    mouseIn: state.getIn(["header", "mouseIn"]),
+    list: state.getIn(["header", "list"]),
+    page: state.getIn(["header", "page"]),
+    totalPage: state.getIn(["header", "totalPage"]),
   };
 };
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    handleSearchFocus() {
-      const active = actionCreator.getSeachFocus();
-      dispatch(active);
+    handleSearchFocus(list) {
+      list.size === 0 && dispatch(actionCreator.getSeachList());
+      dispatch(actionCreator.getSeachFocus());
     },
     handleSearchBlur() {
-      const active = actionCreator.getSeachBlur();
-      dispatch(active);
+      dispatch(actionCreator.getSeachBlur());
+    },
+    handChangeClick(page, totalPage, spin) {
+      let originAngle = spin.style.transform.replace(/[^0-9]/gi, "");
+      if (originAngle) {
+        originAngle = parseInt(originAngle, 10);
+      } else originAngle = 0;
+      spin.style.transform = "rotate(" + (originAngle + 360) + "deg)";
+      let newPage = page;
+      if (newPage < totalPage) newPage++;
+      else newPage = 1;
+      dispatch(actionCreator.getChangeList(newPage));
+    },
+    handleMouseEnter() {
+      dispatch(actionCreator.getMouseEnter());
+    },
+    handleMouseLeave() {
+      dispatch(actionCreator.getMouseLeave());
     },
   };
 };
