@@ -1,7 +1,9 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { CSSTransition } from "react-transition-group";
 import { connect } from "react-redux";
 import * as actionCreator from "./store/actionCreator";
+import * as loginActionCreator from "../../pages/login/store/actionCreator";
+import { Link } from "react-router-dom";
 import {
   HeaderWrapper,
   Logo,
@@ -18,9 +20,16 @@ import {
   Button,
 } from "./style";
 
-class Header extends Component {
+class Header extends PureComponent {
   render() {
-    const { focused, handleSearchFocus, handleSearchBlur, list } = this.props;
+    const {
+      focused,
+      handleSearchFocus,
+      handleSearchBlur,
+      list,
+      login,
+      handleLoginOut,
+    } = this.props;
     return (
       <div>
         <HeaderWrapper>
@@ -28,7 +37,16 @@ class Header extends Component {
           <Nav>
             <NavItem className="left active">首页</NavItem>
             <NavItem className="left">下载App</NavItem>
-            <NavItem className="right">登录 </NavItem>
+            {login ? (
+              <NavItem onClick={handleLoginOut} className="right">
+                退出
+              </NavItem>
+            ) : (
+              <Link to="/login">
+                <NavItem className="right">登录</NavItem>
+              </Link>
+            )}
+
             <NavItem className="right">
               <i className="iconfont">&#xe636;</i>
             </NavItem>
@@ -49,10 +67,12 @@ class Header extends Component {
             </SearchWrapper>
           </Nav>
           <Addition>
-            <Button className="write">
-              <i className="iconfont">&#xe6e5;</i>
-              写文章
-            </Button>
+            <Link to="/write">
+              <Button className="write">
+                <i className="iconfont">&#xe6e5;</i>
+                写文章
+              </Button>
+            </Link>
             <Button className="reg">注册</Button>
           </Addition>
         </HeaderWrapper>
@@ -121,6 +141,7 @@ const mapStateToProps = (state) => {
     list: state.getIn(["header", "list"]),
     page: state.getIn(["header", "page"]),
     totalPage: state.getIn(["header", "totalPage"]),
+    login: state.getIn(["login", "login"]),
   };
 };
 const mapDispatchToProps = (dispatch, ownProps) => {
@@ -148,6 +169,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     },
     handleMouseLeave() {
       dispatch(actionCreator.getMouseLeave());
+    },
+    handleLoginOut() {
+      dispatch(loginActionCreator.loginOut());
     },
   };
 };

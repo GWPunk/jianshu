@@ -14,7 +14,7 @@ const getList = (data) => {
 export const getHomeData = () => {
   return (dispatch) => {
     axios
-      .get("./api/home.json")
+      .get("/api/home.json")
       .then((res) => {
         const result = res.data.data;
         const action = getList(result);
@@ -37,7 +37,7 @@ const moreList = (data, newPage) => {
 export const getMoreList = (page) => {
   return (dispatch) => {
     axios
-      .get("./api/homeList.json?page=" + page)
+      .get("/api/homeList.json?page=" + page)
       .then((res) => {
         const result = res.data.data;
         const action = moreList(result, page + 1);
